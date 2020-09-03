@@ -126,12 +126,11 @@ def updateSheet():
 def getCheckOrder():
 
     try:
-        lastOrder = ftx.fetch_my_trades(pair)[-1]
         Order = []
         j = ftx.fetch_open_orders(pair)
         for i in j:
             Order.append(float(i['info']['price']))
-        return Order, lastOrder
+        return Order
     except ccxt.NetworkError as e:
         getCheckOrder()
     except ccxt.ExchangeError as e:
@@ -214,15 +213,23 @@ def Grid():
     Zone = CreatZone()
     Price = getPrice()
     Order = getCheckOrder()
-    BuyOrder = []
-    SellOrder = []
-    if Order is not None:
-        for i in Zone:
-            if i > Price[1] and i not in Order and i != Order[1]['info']['price'] and Order[1]['info']['side'] != 'sell':
-                SellOrder.append(i)
-            elif i < Price[1] and i not in Order and i != Order[1]['info']['price'] and Order[1]['info']['side'] != 'buy':
-                BuyOrder.append(i)
-        return BuyOrder, SellOrder
+    try:
+        lastOrder = ftx.fetch_my_trades(pair)[-1]
+        BuyOrder = []
+        SellOrder = []
+        if Order is not None:
+            for i in Zone:
+                if i > Price[1] and i not in Order and i != lastOrder['info']['price'] and lastOrder['info']['side'] != 'sell':
+                    SellOrder.append(i)
+                elif i < Price[1] and i not in Order and i != lastOrder['info']['price'] and lastOrder['info']['side'] != 'buy':
+                    BuyOrder.append(i)
+            return BuyOrder, SellOrder
+    except ccxt.RequestTimeout as e:
+        Grid()
+    except ccxt.NetworkError as e:
+        Grid()
+    except Exception as e:
+        Grid()
 
 def StartSell():
 
