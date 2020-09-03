@@ -246,7 +246,7 @@ def StartBuy():
     else:
         b = bGrid[0]
         for i in bGrid:
-            aciont = round(Fund/(b+Gap), digits)
+            aciont = round(Fund/b, digits)
             getBuy(aciont, b)
             return
 
